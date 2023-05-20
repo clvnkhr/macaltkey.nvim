@@ -1,0 +1,1 @@
+-- everything here is executed in the startup of nvim.
