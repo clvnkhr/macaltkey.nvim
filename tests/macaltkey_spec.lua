@@ -1,11 +1,14 @@
 local mak = require("macaltkey")
 
-describe("macaltkey", function()
-	it("can be required", function()
-		require("macaltkey")
+local find_map = function(maps, lhs)
+	for _, map in ipairs(maps) do
+		if map.lhs == lhs then
+			return map
+		end
 	end
-	)
+end
 
+describe("macaltkey", function()
 	it("can correctly maps chars with en-US dict", function()
 		mak.setup({ language = "en-US" })
 		print(mak.language)
@@ -44,5 +47,44 @@ describe("macaltkey", function()
 	end
 	)
 	-- TODO: test the setter and dellers
+	--
+	it("can set commands", function()
+		mak.setup({ language = "en-GB" })
+
+		mak.nvim_set_keymap("n", "test1<a-a>", "rhs1", {})
+		mak.keymap.set("n", "test2<a-b>", "rhs2", {})
+		-- TODO: I don't know how nvim_buf_set_keymap works but it is similarly wrapped so should also work
+		local maps = vim.api.nvim_get_keymap("n")
+
+		local found1 = find_map(maps, mak.convert("test1<a-a>"))
+		local found2 = find_map(maps, mak.convert("test2<a-b>"))
+
+		assert.are.same("rhs1", found1.rhs)
+		assert.are.same("rhs2", found2.rhs)
+	end
+	)
+	it("can del commands", function()
+		mak.setup({ language = "en-GB" })
+
+		mak.nvim_set_keymap("n", "test1<a-a>", "rhs1")
+		mak.keymap.set("n", "test2<a-b>", "rhs2")
+		local maps = vim.api.nvim_get_keymap("n")
+
+		local found1 = find_map(maps, mak.convert("test1<a-a>"))
+
+		local found2 = find_map(maps, mak.convert("test2<a-b>"))
+		assert.are.same("rhs1", found1.rhs)
+		assert.are.same("rhs2", found2.rhs)
+
+		mak.keymap.del("n", "test1<a-a>")
+		mak.nvim_del_keymap("n", "test2<a-b>")
+
+		maps = vim.api.nvim_get_keymap("n")
+		found1 = find_map(maps, mak.convert("test1<a-a>"))
+		found2 = find_map(maps, mak.convert("test2<a-b>"))
+		assert.are.same(nil, found1)
+		assert.are.same(nil, found2)
+	end
+	)
 end
 )
