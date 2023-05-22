@@ -6,15 +6,15 @@ In some terminals (e.g. iTerm2, wezTerm), it is possible to set a keybind for
 option-a as follows:
 
 ```lua
-    vim.keymap.set("n", "å", {mapping}, {opts})
+vim.keymap.set("n", "å", {mapping}, {opts})
 ```
 
 When you have many of these, it is hard to read the configs. This plugin
 allows you to write the following:
 
 ```lua
-    local mak = require"macaltkey"
-    mak.keymap.set("n", "<a-a>", {mapping}, {opts}, {opts2})
+local mak = require"macaltkey"
+mak.keymap.set("n", "<a-a>", {mapping}, {opts}, {opts2})
 ```
 
 `{opts2}` can hold additional options that override those in `mak.setup`.
@@ -22,13 +22,13 @@ This is implemented as a dict with a simple wrapper around vim.keymap.set.
 We implement the following convenience functions
 
 ```lua
-    mak.keymap.set
-    mak.keymap.del
-    mak.nvim_set_keymap
-    mak.nvim_buf_set_keymap
-    mak.nvim_del_keymap
-    mak.nvim_buf_del_keymap
-    mak.convert (see setup options below)
+mak.keymap.set
+mak.keymap.del
+mak.nvim_set_keymap
+mak.nvim_buf_set_keymap
+mak.nvim_del_keymap
+mak.nvim_buf_del_keymap
+mak.convert (see setup options below)
 ```
 
 These commands will transparently pass to the wrapped api function if Mac OS
@@ -37,20 +37,20 @@ is not detected, or if there are no commands like `<a-.>` detected.
 If you previously wrote 
 
 ```lua
-	local set = vim.keymap.set 
+local set = vim.keymap.set 
 ```
 
 you can now simply write
 
 ```lua
-	local set = mak.keymap.set
+local set = mak.keymap.set
 ```
 
 One can also manually convert the lhs:
 
 ```lua
-    local mak = require"macaltkey"
-    vim.keymap.set("n", mak.convert("<a-a>"), {mapping}, {opts}, {opts2})
+local mak = require"macaltkey"
+vim.keymap.set("n", mak.convert("<a-a>"), {mapping}, {opts}, {opts2})
 ```
 
 # Default setup
@@ -106,7 +106,7 @@ It is possible to define your own dicts but non-ascii characters may need specia
 code in mak.convert (see the implementation for `"en-GB"`, which has to treat £ as
 two characters `'\194\163'`; contributions welcome for other layouts.) 
 
-#Acknowledgements
+# Acknowledgements
 
 Inspiration from 
 	['Neovim Lua Plugin From Scratch' by TJ DeVries and bashbunni ](https://www.youtube.com/watch?v=n4Lp4cV8YR0)
