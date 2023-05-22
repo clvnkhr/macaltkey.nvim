@@ -9,12 +9,12 @@ local find_map = function(maps, lhs)
 	end
 end
 
+-- quick and dirty function for debugging
 local printmaplhs = function(maps)
 	for _, map in ipairs(maps) do
 		print(map.lhs)
 	end
 end
-
 
 describe("macaltkey", function()
 	it("can correctly map chars with en-US dict", function()
@@ -44,14 +44,14 @@ describe("macaltkey", function()
 
 	it("can convert legal commands", function()
 		mak.setup({ language = "en-GB" })
-		mak.os = "darwin" --INFO: allow tests to pass on non-macs
+		mak.os = "darwin" -- INFO: allow tests to pass on non-macs
 
 		assert.are.same("hello å‹ß<leader>", mak.convert("hello <a-a><a-£><A-s><leader>"))
 	end
 	)
 
 	it("won't convert illegal commands", function()
-		mak.setup({ language = "en-GB" })
+		mak.setup({ language = "en-GB", modifier = 'a' })
 		mak.os = "darwin"
 
 		assert.are.same("<a-⦿>", mak.convert("<a-⦿>"))

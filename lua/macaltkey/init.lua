@@ -96,7 +96,7 @@ M.nvim_buf_set_keymap = function(buffer, mode, lhs, rhs, opts, opts2)
 	opts = opts or {}
 	opts2 = opts2 or {}
 	vim.api.nvim_buf_set_keymap(buffer, mode, M.convert(lhs), rhs, opts)
-	if opts2.double_set == true or (opts2.double_set == nil and M.double_set == true) then
+	if (opts2.double_set == true) or ((opts2.double_set == nil) and (M.double_set == true)) then
 		vim.api.nvim_buf_set_keymap(buffer, mode, lhs, rhs, opts)
 	end
 end
@@ -105,7 +105,7 @@ end
 M.nvim_del_keymap = function(mode, lhs, opts)
 	opts = opts or {}
 	vim.api.nvim_del_keymap(mode, M.convert(lhs))
-	if opts.double_set == true or (opts.double_set == nil and M.double_set == true) then
+	if (opts.double_set == true) or ((opts.double_set == nil) and (M.double_set == true)) then
 		vim.api.nvim_del_keymap(mode, lhs)
 	end
 end
@@ -114,7 +114,7 @@ end
 M.nvim_buf_del_keymap = function(buffer, mode, lhs, opts)
 	opts = opts or {}
 	vim.api.nvim_buf_del_keymap(buffer, mode, M.convert(lhs))
-	if opts.double_set == true or (opts.double_set == nil and M.double_set == true) then
+	if (opts.double_set == true) or ((opts.double_set == nil) and (M.double_set == true)) then
 		vim.api.nvim_buf_del_keymap(buffer, mode, lhs)
 	end
 end
