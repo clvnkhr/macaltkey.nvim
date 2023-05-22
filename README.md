@@ -61,7 +61,7 @@ require("lazy").setup({
     {
         "clvnkhr/macaltkey.nvim",
         config = function()
-            require "macaltkey".setup()
+            require"macaltkey".setup()
         end
     }
 })
