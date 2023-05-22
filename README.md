@@ -56,6 +56,7 @@ One can also manually convert the lhs:
 # Default setup
 with Lazy.nvim:
 
+```lua
 require("lazy").setup({
     {
         "clvnkhr/macaltkey.nvim",
@@ -64,10 +65,12 @@ require("lazy").setup({
         end
     }
 })
+```
 
 # Setup options
 with Lazy.nvim:
 
+```lua
 require("lazy").setup({
     {
         "clvnkhr/macaltkey.nvim",
@@ -97,6 +100,7 @@ require("lazy").setup({
         end
     }
 })
+```
 
 It is possible to define your own dicts but non-ascii characters may need special
 code in mak.convert (see the implementation for `"en-GB"`, which has to treat £ as
