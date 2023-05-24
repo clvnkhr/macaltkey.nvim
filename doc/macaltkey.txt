@@ -1,6 +1,5 @@
 ================================================================================
-
-			       *macaltkey.nvim*
+                                                              *macaltkey.nvim*
 
 A simple plug-in to make setting alt/option keybinds easier. 
 
@@ -43,9 +42,11 @@ One can also manually convert the lhs:
     local mak = require"macaltkey"
     vim.keymap.set("n", mak.convert("<a-a>"), {mapping}, {opts}, {opts2})
 
-================================================================================
-			      *default* *setup*
-with Lazy.nvim:
+This can be useful in calling keybinds in other places (e.g. plugin setup of
+Lazy.nvim)
+
+                                                           *macaltkey.setup*
+Default setup with Lazy.nvim:
 
 require("lazy").setup({
     {
@@ -56,9 +57,7 @@ require("lazy").setup({
     }
 })
 
-================================================================================
-			      *setup* *options*
-with Lazy.nvim:
+Setup options with Lazy.nvim:
 
 require("lazy").setup({
     {
@@ -90,12 +89,72 @@ require("lazy").setup({
     }
 })
 
+                                                         *macaltkey.convert()*
+macaltkey.convert ({lhs}, {modifier}, {replacer})
+
+    goes through the string lhs and replaces <a-x> keys with the value in the
+    dict. the {a} in <a-x> is not case-sensitive and can be replaced by any
+    character in the optional {modifier} field. This uses string.gsub, and the optional {replacer} field allows you to pass your own funciton to string.gsub.
+
+    Note that we have to treat some characters differently since Lua 5.1 does
+    not treat utf8 chars as a single character.
+
+    For example, with the 'en-GB' keyboard layout:
+>
+    macaltkey.convert("hello <a-a><a-£><A-s><leader>") == "hello å‹ß<leader>"
+<
+
+                                                      *macaltkey.keymap.set()*
+macaltkey.keymap.set ({mode}, {lhs}, {rhs}, {opts}, {opts2})
+    
+    convenience function wrapping the built-in function
+
+        vim.keymap.set ({mode}, {lhs}, {rhs}, {opts}).
+    
+    {opts2} holds macaltkey-specific options that can override settings from
+    setup ({double_set}, {modifier}). 
+    - {modifier} is passed to the above macaltkey.convert.
+    - {double_set = true} will call vim.keymap.set twice, once with {lhs} 
+      and once more with {macaltkey.convert("lhs")}. 
+
+                                                      *macaltkey.keymap.del()*
+macaltkey.keymap.del ({mode}, {lhs}, {opts}, {opts2})
+    
+    Similarly to macaltkey.keymap.set, this wraps vim.keymap.del. {opts2} is
+    for macaltkey-specific options.
+
+                                                 *macaltkey.nvim_set_keymap()*
+macaltkey.nvim_set_keymap ({mode}, {lhs}, {rhs}, {opts}, {opts2})
+
+    Similarly to macaltkey.keymap.set, this wraps vim.api.nvim_set_keymap.
+    {opts2} is for macaltkey-specific options.
+
+                                             *macaltkey.nvim_buf_set_keymap()*
+macaltkey.nvim_buf_set_keymap ({buf}, {mode}, {lhs}, {rhs}, {opts}, {opts2})
+
+    Similarly to macaltkey.keymap.set, this wraps the built-in function 
+    vim.api.nvim_buf_set_keymap. {opts2} is for macaltkey-specific options.
+
+                                                 *macaltkey.nvim_del_keymap()*
+macaltkey.nvim_del_keymap ({mode}, {lhs}, {opts})
+
+    Similarly to macaltkey.keymap.set, this wraps vim.api.nvim_del_keymap.
+    {opts} is for macaltkey-specific options.
+
+                                             *macaltkey.nvim_buf_del_keymap()*
+macaltkey.nvim_set_keymap ({buf}, {mode}, {lhs}, {opts}, )
+
+    Similarly to macaltkey.keymap.set, this wraps the built-in function 
+    vim.api.nvim_buf_del_keymap. {opts} is for macaltkey-specific options.
+
+
+
 It is possible to define your own dicts but non-ascii characters may need special
 code in mak.convert (see the implementation for "en-GB", which has to treat £ as
 two characters '\194\163'; contributions welcome for other layouts.) 
 
 ================================================================================
-			      *acknowledgements*
+			     acknowledgements
 Inspiration from 
 	'Neovim Lua Plugin From Scratch' by TJ DeVries and bashbunni 
 	(https://www.youtube.com/watch?v=n4Lp4cV8YR0)
