@@ -75,8 +75,11 @@ require("lazy").setup({
             -- or "en-GB" British. US is default
 
             modifier = 'a',
-            -- If this is e.g. 'y', then 
-            -- will convert <y-x> to the character at option-x.
+            -- If this is a single char like 'y', then 
+            -- will convert <y-x> or <Y-x> (case insensitive) to the character at option-x.
+            -- also accepts arbitrary strings, e.g. 'abc' will convert
+            -- any of <a-x>, <b-x>, and <c-x> (case sensitive).
+    
             -- Can be passed to the extra opts table of the 
             -- convenience functions.
 
