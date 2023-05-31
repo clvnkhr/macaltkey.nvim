@@ -1,6 +1,6 @@
 # macaltkey.nvim
 
-A simple plug-in to make setting alt/option keybinds easier. 
+A simple plug-in to make setting alt/option keybinds easier.
 
 In some terminals (e.g. iTerm2, wezTerm), it is possible to set a keybind for
 option-a as follows:
@@ -18,7 +18,7 @@ mak.keymap.set("n", "<a-a>", {mapping}, {opts}, {opts2})
 ```
 
 `{opts2}` can hold additional options that override those in `mak.setup`.
-This is implemented as a dict with a simple wrapper around vim.keymap.set. 
+This is implemented as a dict with a simple wrapper around vim.keymap.set.
 We implement the following convenience functions
 
 ```lua
@@ -28,16 +28,16 @@ mak.nvim_set_keymap
 mak.nvim_buf_set_keymap
 mak.nvim_del_keymap
 mak.nvim_buf_del_keymap
-mak.convert (see setup options below)
+mak.convert
 ```
 
 These commands will transparently pass to the wrapped api function if Mac OS
-is not detected, or if there are no commands like `<a-.>` detected. 
+is not detected, or if there are no commands like `<a-.>` detected.
 
-If you previously wrote 
+If you previously wrote
 
 ```lua
-local set = vim.keymap.set 
+local set = vim.keymap.set
 ```
 
 you can now simply write
@@ -53,7 +53,14 @@ local mak = require"macaltkey"
 vim.keymap.set("n", mak.convert("<a-a>"), {mapping}, {opts}, {opts2})
 ```
 
+If you want some help converting your older keymaps, there is a deconvert function that takes in a converted string and outputs the corresponding <a-.> command:
+
+```lua
+mak.deconvert("") == "<a-K>"
+```
+
 # Default setup
+
 with Lazy.nvim:
 
 ```lua
@@ -68,6 +75,7 @@ require("lazy").setup({
 ```
 
 # Setup options
+
 with Lazy.nvim:
 
 ```lua
@@ -81,15 +89,15 @@ require("lazy").setup({
             -- or "en-GB" British. US is default
 
             modifier = 'a',
-            -- If this is e.g. 'y', then 
+            -- If this is e.g. 'y', then
             -- will convert <y-x> to the character at option-x.
-            -- Can be passed to the extra opts table of the 
+            -- Can be passed to the extra opts table of the
             -- convenience functions.
 
             double_set = false,
             -- If this is true, then will set both the converted
             -- and unconverted keybind, e.g. both <a-a> and å.
-            -- Can be passed to the extra opts table of the 
+            -- Can be passed to the extra opts table of the
             -- convenience functions.
             })
 
@@ -104,12 +112,12 @@ require("lazy").setup({
 
 It is possible to define your own dicts but non-ascii characters may need special
 code in mak.convert (see the implementation for `"en-GB"`, which has to treat £ as
-two characters `'\194\163'`; contributions welcome for other layouts.) 
+two characters `'\194\163'`; contributions welcome for other layouts.)
 
 # Acknowledgements
 
-Inspiration from 
-	['Neovim Lua Plugin From Scratch' by TJ DeVries and bashbunni ](https://www.youtube.com/watch?v=n4Lp4cV8YR0)
-	and ['Create Neovim Plugins with Lua' by DevOnDuty](https://www.youtube.com/watch?v=wkxtHV1hzEY)
+Inspiration from
+['Neovim Lua Plugin From Scratch' by TJ DeVries and bashbunni ](https://www.youtube.com/watch?v=n4Lp4cV8YR0)
+and ['Create Neovim Plugins with Lua' by DevOnDuty](https://www.youtube.com/watch?v=wkxtHV1hzEY)
 
 The get_os function is from [f-person/auto-dark-mode.nvim](https://github.com/f-person/auto-dark-mode.nvim).

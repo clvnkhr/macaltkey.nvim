@@ -1,5 +1,8 @@
 local M = {}
 
+-- TODO: profile this code, and if its slow try to remove lowerupper. this change will allow for multiple replacers at once. I can probably keep lowerupper around in case the modifier is a single char
+-- Expose a force option
+
 -- taken from f-person/auto-dark-mode.nvim
 ---@return 'win'|'darwin'|'linux'
 M.get_os = function()
@@ -21,37 +24,52 @@ M.setup = function(opts)
 	opts = opts or {}
 	M.language = opts.language or "en-GB"
 	M.dict = require('macaltkey.dicts')[M.language]
-	M.modifier = opts.modifier or 'a'
+	M.modifier = opts.modifier or 'aA'
 	M.double_set = opts.double_set or false
 	M.os = M.get_os()
+	M.default_pattern = M.pattern(M.modifier)
+	M.flag = nil
+	if opts.force ~= nil then
+		M.flag = opts.force
+	else
+		M.flag = M.os == "darwin"
+	end
 end
 
-local lowerupper = function(modifier)
+M.lowerupper = function(modifier)
 	modifier = modifier or M.modifier
 	return string.lower(modifier) .. string.upper(modifier)
 end
 
 -- makes a lua pattern using modifier
-M.pattern = function(modifier)
+M.pattern = function(modifier, ch)
+	ch = ch or '.'
 	modifier = modifier or M.modifier
-	return "<[" .. lowerupper(modifier) .. "]--(.)>"
-end
-
--- function to be passed into string.gsub.
-M.replacer = function(match)
-	return M.dict[match] or ("<" .. M.modifier .. "-" .. match .. ">")
+	if string.len(M.modifier) == 1 then
+		return "<[" .. M.lowerupper(modifier) .. "]--(" .. ch .. ")>"
+	else
+		return "<[" .. modifier .. "]--(" .. ch .. ")>"
+	end
 end
 
 -- Do nothing if not using Mac OS
 -- Otherwise, replace using M.pattern and M.replacer
 M.convert = function(lhs, modifier, replacer)
-	if M.os ~= "darwin" then return lhs end
+	if not M.flag then return lhs end
 
-	local out = string.gsub(lhs, M.pattern(modifier), replacer or M.replacer)
+	local pattern
+	if modifier == nil then
+		pattern = M.default_pattern
+		modifier = M.modifier
+	else
+		pattern = M.pattern(modifier)
+	end
+
+	local out = string.gsub(lhs, pattern, replacer or M.dict)
 
 	if M.language == 'en-GB' then
 		-- INFO: additional handling required for the £ character.
-		out = string.gsub(out, '<[' .. lowerupper(modifier) .. ']--(\194\163)>', M.dict)
+		out = string.gsub(out, M.pattern(modifier, '£'), '‹')
 	end
 	return out
 end
@@ -63,7 +81,7 @@ M.keymap = {
 		opts = opts or {}
 		opts2 = opts2 or {}
 		vim.keymap.set(mode, M.convert(lhs), rhs, opts)
-		if opts2.double_set == true or (opts2.double_set == nil and M.double_set == true) then
+		if opts2.double_set == true or (opts2.double_set == nil and M.double_set == true and M.os == "darwin") then
 			vim.keymap.set(mode, lhs, rhs, opts)
 		end
 	end,
@@ -72,7 +90,7 @@ M.keymap = {
 		opts = opts or {}
 		opts2 = opts2 or {}
 		vim.keymap.del(mode, M.convert(lhs), opts)
-		if opts2.double_set == true or (opts2.double_set == nil and M.double_set == true) then
+		if opts2.double_set == true or (opts2.double_set == nil and M.double_set == true and M.os == "darwin") then
 			vim.keymap.del(mode, lhs, opts)
 		end
 	end
@@ -85,7 +103,7 @@ M.nvim_set_keymap = function(mode, lhs, rhs, opts, opts2)
 	vim.api.nvim_set_keymap(mode, M.convert(lhs), rhs, opts)
 	-- P(opts2.double_set)
 	-- P((opts2.double_set == nil) and (M.double_set == true))
-	if (opts2.double_set == true) or ((opts2.double_set == nil) and (M.double_set == true)) then
+	if (opts2.double_set == true) or ((opts2.double_set == nil) and (M.double_set == true and M.os == "darwin")) then
 		-- P('inside if')
 		vim.api.nvim_set_keymap(mode, lhs, rhs, opts)
 	end
@@ -96,7 +114,7 @@ M.nvim_buf_set_keymap = function(buffer, mode, lhs, rhs, opts, opts2)
 	opts = opts or {}
 	opts2 = opts2 or {}
 	vim.api.nvim_buf_set_keymap(buffer, mode, M.convert(lhs), rhs, opts)
-	if (opts2.double_set == true) or ((opts2.double_set == nil) and (M.double_set == true)) then
+	if (opts2.double_set == true) or ((opts2.double_set == nil) and (M.double_set == true and M.os == "darwin")) then
 		vim.api.nvim_buf_set_keymap(buffer, mode, lhs, rhs, opts)
 	end
 end
@@ -105,7 +123,7 @@ end
 M.nvim_del_keymap = function(mode, lhs, opts)
 	opts = opts or {}
 	vim.api.nvim_del_keymap(mode, M.convert(lhs))
-	if (opts.double_set == true) or ((opts.double_set == nil) and (M.double_set == true)) then
+	if (opts.double_set == true) or ((opts.double_set == nil) and (M.double_set == true and M.os == "darwin")) then
 		vim.api.nvim_del_keymap(mode, lhs)
 	end
 end
@@ -114,9 +132,32 @@ end
 M.nvim_buf_del_keymap = function(buffer, mode, lhs, opts)
 	opts = opts or {}
 	vim.api.nvim_buf_del_keymap(buffer, mode, M.convert(lhs))
-	if (opts.double_set == true) or ((opts.double_set == nil) and (M.double_set == true)) then
+	if (opts.double_set == true) or ((opts.double_set == nil) and (M.double_set == true and M.os == "darwin")) then
 		vim.api.nvim_buf_del_keymap(buffer, mode, lhs)
 	end
+end
+
+-- function to make the reverse dict. Not called in setup to avoid making it if we don't want to
+M.make_rev_dict = function(prefix, postfix)
+	local new_d = {}
+	for k, v in pairs(M.dict) do
+		new_d[v] = prefix .. k .. postfix
+	end
+	return new_d
+end
+
+-- function to help converting vim.keymap to macaltkey convenience functions.
+-- There is no default utf8 handling in Lua 5.1, so we make multiple passes:
+-- once for single byte chars(#), once for multibytes chars(£).
+M.deconvert = function(text, prefix, postfix)
+	prefix = prefix or "<a-"
+	postfix = postfix or ">"
+	if M.reverse_dict == nil then
+		M.reverse_dict = M.make_rev_dict(prefix, postfix)
+	end
+	local out = string.gsub(text, '.', M.reverse_dict)
+	return string.gsub(out, '[\192-\255][\128-\191]*', M.reverse_dict)
+	-- return out
 end
 
 return M

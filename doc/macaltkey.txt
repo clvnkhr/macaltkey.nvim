@@ -5,49 +5,55 @@ A simple plug-in to make setting alt/option keybinds easier.
 
 In some terminals (e.g. iTerm2, wezTerm), it is possible to set a keybind for
 option-a as follows:
-
+>
     vim.keymap.set("n", "å", {mapping}, {opts})
-
+<
 When you have many of these, it is hard to read the configs. This plugin
 allows you to write the following:
-
+>
     local mak = require"macaltkey"
     mak.keymap.set("n", "<a-a>", {mapping}, {opts}, {opts2})
-
+<
 {opts2} can hold additional options that override those in mak.setup.
 This is implemented as a dict with a simple wrapper around vim.keymap.set. 
 We implement the following convenience functions
-
+>
     mak.keymap.set
     mak.keymap.del
     mak.nvim_set_keymap
     mak.nvim_buf_set_keymap
     mak.nvim_del_keymap
     mak.nvim_buf_del_keymap
-    mak.convert (see setup options below)
-
+    mak.convert 
+<
 These commands will transparently pass to the wrapped api function if Mac OS
 is not detected, or if there are no commands like <a-.> detected. 
 
 If you previously wrote 
-
+>
 	local set = vim.keymap.set 
-
+<
 you can now simply write
-
+>
 	local set = mak.keymap.set
-
+<
 One can also manually convert the lhs:
-
+>
     local mak = require"macaltkey"
     vim.keymap.set("n", mak.convert("<a-a>"), {mapping}, {opts}, {opts2})
+<
+This may be useful in making your own convenience functions.
 
-This can be useful in calling keybinds in other places (e.g. plugin setup of
-Lazy.nvim)
+If you want some help converting your older keymaps, there is a deconvert 
+function that takes in a converted string and outputs the corresponding 
+<a-.> command, e.g.
+>
+   mak.deconvert("") == "<a-K>"
+
 
                                                            *macaltkey.setup*
 Default setup with Lazy.nvim:
-
+>
 require("lazy").setup({
     {
         "clvnkhr/macaltkey.nvim",
@@ -56,7 +62,7 @@ require("lazy").setup({
         end
     }
 })
-
+<
 Setup options with Lazy.nvim:
 
 require("lazy").setup({
@@ -94,7 +100,8 @@ macaltkey.convert ({lhs}, {modifier}, {replacer})
 
     goes through the string lhs and replaces <a-x> keys with the value in the
     dict. the {a} in <a-x> is not case-sensitive and can be replaced by any
-    character in the optional {modifier} field. This uses string.gsub, and the optional {replacer} field allows you to pass your own funciton to string.gsub.
+    character in the optional {modifier} field. This uses string.gsub, and the 
+    {replacer} field allows you to pass your own function to string.gsub.
 
     Note that we have to treat some characters differently since Lua 5.1 does
     not treat utf8 chars as a single character.
@@ -102,6 +109,25 @@ macaltkey.convert ({lhs}, {modifier}, {replacer})
     For example, with the 'en-GB' keyboard layout:
 >
     macaltkey.convert("hello <a-a><a-£><A-s><leader>") == "hello å‹ß<leader>"
+<
+
+                                                       *macaltkey.deconvert()*
+macaltkey.deconvert ({char}, {prefix}, {postfix})
+
+    Takes a string {char} consisting of a single utf8 char and returns the Lua
+    string
+    {prefix} .. {k} .. {postfix}
+    where {k} is the key such that macaltkey.convert(<a-k>) = {char}.
+
+    If prefix is nil then it is set automatically to "<a-".
+    If postfix is nil then it is set automatically to ">".
+
+    M.reverse_dict is created and cached in macaltkey.deconvert, which in
+    particular will fix the choice of prefix and postfix. If you want
+    to call macaltkey with different prefix and postfix, you should
+    dereference M.reverse_dict, i.e. set
+>
+    M.reverse_dict = nil
 <
 
                                                       *macaltkey.keymap.set()*
