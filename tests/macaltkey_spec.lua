@@ -230,14 +230,14 @@ describe("macaltkey", function()
 		mak.reverse_dict = nil
 		-- single char test
 		assert.are.same("K", mak.deconvert("", "", ""))
-		assert.are.same("`", mak.deconvert(mak.convert("<a-`>"), "", ""))
+		assert.are.same("X", mak.deconvert(mak.convert("<a-X>"), "", ""))
 
 		mak.reverse_dict = nil
 		assert.are.same("<a-K>", mak.deconvert(""))
 		assert.are.same("<a-3>", mak.deconvert("#"))
 		assert.are.same("<a-r>", mak.deconvert("®"))
 		assert.are.same("<a-~>", mak.deconvert(mak.convert("<a-~>")))
-		assert.are.same("<a-`>", mak.deconvert(mak.convert("<a-`>"), "", ""))
+		assert.are.same("<a-S>", mak.deconvert(mak.convert("<a-S>"), "", ""))
 	end)
 
 	it("can deconvert all chars", function()

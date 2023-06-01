@@ -52,7 +52,7 @@ return {
     X = 'Ù',
     Y = 'Á',
     Z = 'Û',
-    ['`'] = '`',
+    -- ['`'] = '`', -- these are actually the same character
     [','] = '≤',
     ['.'] = '≥',
     ['/'] = '÷',
@@ -148,7 +148,7 @@ return {
     X = '˛',
     Y = 'Á',
     Z = '¸',
-    ['`'] = '`',
+    -- ['`'] = '`', -- these characters are actually identical.
     [','] = '≤',
     ['.'] = '≥',
     ['/'] = '÷',
